@@ -9,24 +9,33 @@ import {
   Layout, 
   Zap, 
   FileText,
-  CheckCircle2,
+  Star,
   Clock
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-const stats = [
-  { label: "Notes Created", value: "24", icon: FileText, color: "text-blue-400" },
-  { label: "Tasks Done", value: "12", icon: CheckCircle2, color: "text-emerald-400" },
-  { label: "Active Stacks", value: "3", icon: Code2, color: "text-amber-400" },
-]
-
-const recentNotes = [
-  { title: "Next.js 15 Middleware API", folder: "Next.js", date: "2 mins ago" },
-  { title: "React Context vs Zustand", folder: "React", date: "1 hour ago" },
-  { title: "Tailwind 4.0 Theme Configuration", folder: "Tailwind CSS", date: "3 hours ago" },
-]
+import { useNoteStore } from "@/lib/store"
+import { useRouter } from "next/navigation"
 
 export default function Home() {
+  const router = useRouter()
+  const notes = useNoteStore((state) => state.notes)
+  const addNote = useNoteStore((state) => state.addNote)
+
+  const stats = [
+    { label: "Total Notes", value: notes.length.toString(), icon: FileText, color: "text-blue-400" },
+    { label: "Favorites", value: notes.filter(n => n.isFavorite).length.toString(), icon: Star, color: "text-amber-400" },
+    { label: "Recent Folders", value: Array.from(new Set(notes.map(n => n.folder))).length.toString(), icon: Code2, color: "text-emerald-400" },
+  ]
+
+  const recentNotes = [...notes]
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+    .slice(0, 5)
+
+  const handleNewNote = () => {
+    const id = addNote()
+    router.push(`/notes/${id}`)
+  }
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -48,6 +57,7 @@ export default function Home() {
           variant="shadow" 
           startContent={<Zap size={18} />}
           className="font-medium h-11"
+          onClick={handleNewNote}
         >
           New Quick Note
         </Button>
@@ -90,9 +100,10 @@ export default function Home() {
           </div>
           
           <div className="space-y-3">
-            {recentNotes.map((note) => (
+            {recentNotes.length > 0 ? recentNotes.map((note) => (
               <div 
-                key={note.title}
+                key={note.id}
+                onClick={() => router.push(`/notes/${note.id}`)}
                 className="group flex items-center justify-between p-4 rounded-xl border border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.05] transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-4">
@@ -103,13 +114,17 @@ export default function Home() {
                     <h4 className="font-medium group-hover:text-white mb-0.5">{note.title}</h4>
                     <p className="text-xs text-text-muted flex items-center gap-2">
                       <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">{note.folder}</span>
-                      {note.date}
+                      {new Date(note.updatedAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                 </div>
                 <ArrowUpRight size={18} className="text-text-muted opacity-0 group-hover:opacity-100 transition-all" />
               </div>
-            ))}
+            )) : (
+              <div className="p-8 text-center border border-dashed border-white/10 rounded-xl">
+                <p className="text-text-muted italic">No notes yet. Create one to get started!</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -123,9 +138,10 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-2 gap-4">
-            {["Next.js", "React", "Typescript", "Tailwind"].map((tech) => (
+            {["Next.js", "React", "TypeScript", "Tailwind"].map((tech) => (
               <div 
                 key={tech}
+                onClick={handleNewNote}
                 className="linear-border aspect-square rounded-2xl bg-white/5 flex flex-col items-center justify-center gap-3 hover:bg-white/[0.07] transition-all cursor-pointer group"
               >
                 <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-brand-primary/50 transition-colors">
