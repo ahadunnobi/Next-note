@@ -1,21 +1,15 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
-import { 
-  Command, 
-  Search, 
-  FileText, 
-  Plus, 
-  Settings, 
-  Hash,
-  Zap
-} from "lucide-react"
-import * as Dialog from "@radix-ui/react-dialog"
-import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { useNoteStore } from "@/lib/store"
+import { useRouter } from "next/navigation"
 
 export default function CommandPalette() {
   const [isOpen, setIsOpen] = useState(false)
+  const [query, setQuery] = useState("")
+  const router = useRouter()
+  
+  const notes = useNoteStore((state) => state.notes)
+  const addNote = useNoteStore((state) => state.addNote)
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -28,6 +22,21 @@ export default function CommandPalette() {
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
   }, [])
+
+  const filteredNotes = query === "" 
+    ? notes.slice(0, 5) 
+    : notes.filter((note) => note.title.toLowerCase().includes(query.toLowerCase())).slice(0, 8)
+
+  const handleSelectNote = (id: string) => {
+    setIsOpen(false)
+    router.push(`/notes/${id}`)
+  }
+
+  const handleNewNote = () => {
+    setIsOpen(false)
+    const id = addNote()
+    router.push(`/notes/${id}`)
+  }
 
   return (
     <AnimatePresence>
@@ -55,6 +64,8 @@ export default function CommandPalette() {
                     <input 
                       autoFocus
                       placeholder="Type a command or search..."
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
                       className="flex-1 bg-transparent border-none outline-none text-lg text-white placeholder:text-text-muted"
                     />
                     <kbd className="text-[10px] bg-white/10 px-2 py-1 rounded border border-white/5 text-text-muted">ESC</kbd>
@@ -62,14 +73,22 @@ export default function CommandPalette() {
 
                   <div className="p-2 max-h-[60vh] overflow-y-auto subtle-scroll">
                     <Section title="Quick Actions">
-                      <Item icon={Plus} label="New Note" shortcut="N" />
+                      <Item icon={Plus} label="New Note" shortcut="N" onClick={handleNewNote} />
                       <Item icon={Zap} label="Quick Task" shortcut="T" />
                     </Section>
 
-                    <Section title="Recent Notes">
-                      <Item icon={FileText} label="Next.js 15 Middleware API" />
-                      <Item icon={FileText} label="React Context vs Zustand" />
-                    </Section>
+                    {filteredNotes.length > 0 && (
+                      <Section title="Notes">
+                        {filteredNotes.map(note => (
+                          <Item 
+                            key={note.id} 
+                            icon={FileText} 
+                            label={note.title} 
+                            onClick={() => handleSelectNote(note.id)} 
+                          />
+                        ))}
+                      </Section>
+                    )}
 
                     <Section title="Settings">
                       <Item icon={Settings} label="Preferences" shortcut="," />
@@ -83,7 +102,7 @@ export default function CommandPalette() {
                     </div>
                     <div className="flex items-center gap-1">
                       <span>Search by</span>
-                      <span className="font-bold text-white tracking-widest">NEXT NOTE</span>
+                      <span className="font-bold text-white tracking-widest uppercase">Next Note</span>
                     </div>
                   </div>
                 </motion.div>
@@ -107,9 +126,12 @@ function Section({ title, children }: { title: string, children: React.ReactNode
   )
 }
 
-function Item({ icon: Icon, label, shortcut }: { icon: any, label: string, shortcut?: string }) {
+function Item({ icon: Icon, label, shortcut, onClick }: { icon: any, label: string, shortcut?: string, onClick?: () => void }) {
   return (
-    <div className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-white/5 cursor-pointer group transition-colors">
+    <div 
+      onClick={onClick}
+      className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-white/5 cursor-pointer group transition-colors"
+    >
       <div className="flex items-center gap-3">
         <Icon size={18} className="text-text-muted group-hover:text-brand-primary" />
         <span className="text-sm font-medium group-hover:text-white">{label}</span>
@@ -120,3 +142,4 @@ function Item({ icon: Icon, label, shortcut }: { icon: any, label: string, short
     </div>
   )
 }
+
