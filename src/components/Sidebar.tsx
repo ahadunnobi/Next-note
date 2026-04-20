@@ -1,6 +1,4 @@
-"use client"
-
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   Plus, 
@@ -12,12 +10,23 @@ import {
   ChevronRight,
   Hash,
   Star,
-  Clock
+  Clock,
+  X
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpenMobile?: boolean
+  setIsOpenMobile?: (open: boolean) => void
+}
+
+export default function Sidebar({ isOpenMobile, setIsOpenMobile }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  
+  // Close sidebar on mobile when navigating (simulated here)
+  const handleItemClick = () => {
+    if (setIsOpenMobile) setIsOpenMobile(false)
+  }
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/" },
@@ -43,6 +52,42 @@ export default function Sidebar() {
   ]
 
   return (
+    <>
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {isOpenMobile && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsOpenMobile?.(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.div 
+        initial={false}
+        animate={{ 
+          width: isCollapsed ? 70 : 260,
+          x: isOpenMobile ? 0 : (typeof window !== "undefined" && window.innerWidth < 1024 ? -260 : 0)
+        }}
+        transition={{ type: "spring", damping: 20, stiffness: 100 }}
+        className={cn(
+          "fixed lg:relative h-screen bg-bg-dark border-r border-border-subtle flex flex-col z-[70] lg:z-50",
+          isCollapsed ? "items-center" : "items-stretch",
+          !isOpenMobile && "max-lg:-translate-x-full"
+        )}
+      >
+        {/* Header */}
+        <div className={cn("p-4 flex items-center justify-between", isCollapsed && "justify-center")}>
+          {!isCollapsed && (
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center font-bold text-white shadow-lg glow-hover">
+                N
+              </div>
+              <span className="font-bold text-lg tracking-tight">Next Note</span>
+            </div>
     <motion.div 
       initial={false}
       animate={{ width: isCollapsed ? 70 : 260 }}
@@ -54,7 +99,7 @@ export default function Sidebar() {
       {/* Header */}
       <div className={cn("p-4 flex items-center justify-between", isCollapsed && "justify-center")}>
         {!isCollapsed && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
             <div className="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center font-bold text-white shadow-lg glow-hover">
               N
             </div>
@@ -62,7 +107,7 @@ export default function Sidebar() {
           </div>
         )}
         {isCollapsed && (
-          <div className="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center font-bold text-white">
+          <div className="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center font-bold text-white" onClick={() => router.push("/")}>
             N
           </div>
         )}
@@ -76,7 +121,17 @@ export default function Sidebar() {
 
       {/* Search Bar Placeholder */}
       <div className="px-4 mb-6">
-        <div className={cn(
+        <div 
+          onClick={() => {
+            // Trigger Command Palette logic (shortcut usually handled globally, but click works too)
+            const event = new KeyboardEvent('keydown', {
+              key: 'k',
+              metaKey: true,
+              ctrlKey: true,
+            })
+            document.dispatchEvent(event)
+          }}
+          className={cn(
           "flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all cursor-pointer text-text-muted group",
           isCollapsed ? "justify-center px-0 w-10" : "w-full"
         )}>
@@ -91,10 +146,11 @@ export default function Sidebar() {
       </div>
 
       {/* Main Menu */}
-      <nav className="flex-1 px-4 space-y-1">
+      <nav className="flex-1 px-4 space-y-1 subtle-scroll overflow-y-auto">
         {menuItems.map((item) => (
           <div 
             key={item.label}
+            onClick={item.onClick}
             className={cn(
               "flex items-center gap-3 px-3 py-2 rounded-lg transition-all cursor-pointer group",
               item.primary ? "bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20" : "hover:bg-white/5 text-text-muted hover:text-white",
@@ -107,38 +163,41 @@ export default function Sidebar() {
         ))}
 
         {/* Separator */}
-        <div className="my-6 border-t border-border-subtle" />
+        {!isCollapsed && notes.length > 0 && <div className="my-6 border-t border-border-subtle" />}
 
         {/* Sections */}
         <AnimatePresence>
           {!isCollapsed && sections.map((section) => (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              key={section.title} 
-              className="mb-6"
-            >
-              <h3 className="px-3 text-[10px] uppercase tracking-widest text-text-muted/50 font-bold mb-2">
-                {section.title}
-              </h3>
-              <div className="space-y-1">
-                {section.items.map((item) => (
-                  <div 
-                    key={item.label}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-text-muted hover:text-white transition-all cursor-pointer group"
-                  >
-                    <item.icon size={14} className="opacity-50 group-hover:opacity-100" />
-                    <span className="text-sm truncate">{item.label}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            section.items.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                key={section.title} 
+                className="mb-6"
+              >
+                <h3 className="px-3 text-[10px] uppercase tracking-widest text-text-muted/50 font-bold mb-2">
+                  {section.title}
+                </h3>
+                <div className="space-y-1">
+                  {section.items.map((item) => (
+                    <div 
+                      key={item.id}
+                      onClick={() => router.push(`/notes/${item.id}`)}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-text-muted hover:text-white transition-all cursor-pointer group"
+                    >
+                      <item.icon size={14} className={cn("opacity-50 group-hover:opacity-100", item.icon === Star && "text-amber-400 opacity-100")} />
+                      <span className="text-sm truncate">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )
           ))}
         </AnimatePresence>
       </nav>
 
-      {/* Footer */}
+      {/* User Info (Stub) */}
       <div className={cn("p-4 border-t border-border-subtle", isCollapsed && "flex justify-center")}>
         <div className={cn(
           "flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all cursor-pointer",
