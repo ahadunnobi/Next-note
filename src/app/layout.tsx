@@ -7,6 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import CommandPalette from "@/components/CommandPalette";
 import { Providers } from "@/components/providers";
 import { Menu } from "lucide-react";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,10 +24,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${inter.variable} h-full antialiased`}
     >
       <body className="h-full bg-bg-dark text-foreground flex overflow-hidden">
         <Providers>
+          <Toaster position="bottom-right" theme="dark" closeButton richColors />
           <Sidebar isOpenMobile={isOpenMobile} setIsOpenMobile={setIsOpenMobile} />
           <CommandPalette />
           
@@ -48,10 +51,13 @@ export default function RootLayout({
               </button>
             </header>
 
-            <main className="flex-1 overflow-y-auto subtle-scroll relative">
-              {/* Subtle background glow effect */}
-              <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-primary/10 blur-[120px] pointer-events-none" />
-              <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-indigo-500/5 blur-[100px] pointer-events-none" />
+            <main className="flex-1 overflow-y-auto subtle-scroll relative z-0">
+              {/* Premium Background Atmosphere */}
+              <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+                <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-brand-primary/10 blur-[120px] rounded-full animate-pulse" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/5 blur-[100px] rounded-full" />
+                <div className="absolute top-[20%] left-[10%] w-[30%] h-[30%] bg-purple-500/5 blur-[150px] rounded-full" />
+              </div>
               
               <div className="max-w-5xl mx-auto px-4 sm:px-8 py-8 sm:py-12 min-h-full">
                 {children}
