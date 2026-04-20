@@ -1,8 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next Note
 
-## Getting Started
+**Next Note** is a premium, top-tier note-taking and task management application, inspired by industry-leading tools like Notion. It aims to provide a robust, feature-rich, and visually stunning workspace for organizing your thoughts, tasks, and documentation seamlessly.
 
-First, run the development server:
+## 🚀 Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **Library**: [React 19](https://react.dev/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Language**: TypeScript
+
+## ✨ Key Features (Planned)
+
+- **Premium Interface**: A dynamic, glassmorphic, and high-fidelity modern design aesthetic.
+- **Rich Note-Taking Capabilities**: Block-style editor similar to premium text editors, with markdown support.
+- **Task Management**: Integrated to-dos, Kanban boards, and project tracking.
+- **Dynamic Workspaces**: Seamless navigation, folder organization, and nested page creation.
+- **High Performance**: Optimized with Next.js App router features for fast loading and responsive micro-animations.
+
+## 📦 Getting Started
+
+First, ensure you have Node.js installed, then install the dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
@@ -16,21 +43,10 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🎨 Design Philosophy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Next Note prioritizes visual excellence and a seamless user experience. By utilizing modern web design principles—such as harmonious color palettes, modern typography (Geist Sans/Mono), subtle micro-animations, and dynamic interactions—the app ensures a premium feel at every interaction point.
 
-## Learn More
+## 🤝 Contribution & Development
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+You can start editing the application by modifying `src/app/page.tsx`. The environment is pre-configured with ESLint for clean code architecture and Tailwind CSS for rapid UI development.
