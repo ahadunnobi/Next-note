@@ -72,20 +72,20 @@ export default function Editor({ note }: EditorProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32">
+    <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32">
       {/* Editor Header/Toolbar */}
       <div className="flex items-center justify-between pb-4 border-b border-white/5">
-        <div className="flex items-center gap-4 text-text-muted text-sm">
-          <Link href="/" className="hover:text-white cursor-pointer transition-colors flex items-center gap-1">
+        <div className="flex items-center gap-2 sm:gap-4 text-text-muted text-xs sm:text-sm overflow-hidden">
+          <Link href="/" className="hover:text-white cursor-pointer transition-colors flex items-center gap-1 flex-shrink-0">
             <ChevronLeft size={14} />
-            Dashboard
+            <span className="hidden sm:inline">Dashboard</span>
           </Link>
-          <span>/</span>
-          <span className="text-white font-medium truncate max-w-[200px]">{title}</span>
+          <span className="hidden sm:inline">/</span>
+          <span className="text-white font-medium truncate max-w-[120px] sm:max-w-[200px]">{title}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {isSaving && (
-            <span className="text-[10px] text-brand-primary animate-pulse mr-2">Saving...</span>
+            <span className="text-[10px] text-brand-primary animate-pulse mr-1 sm:mr-2">Saving...</span>
           )}
           <button 
             onClick={() => toggleFavorite(note.id)}
@@ -93,12 +93,13 @@ export default function Editor({ note }: EditorProps) {
               "p-2 rounded-lg transition-colors",
               note.isFavorite ? "text-amber-400 bg-amber-400/10" : "text-text-muted hover:bg-white/5 hover:text-white"
             )}
+            title="Favorite"
           >
             <Star size={18} fill={note.isFavorite ? "currentColor" : "none"} />
           </button>
-          <button className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white transition-colors border border-white/5 flex items-center gap-2">
+          <button className="px-2 sm:px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-xs sm:text-sm text-white transition-colors border border-white/5 flex items-center gap-2">
             <Share2 size={16} />
-            Share
+            <span className="hidden xs:inline">Share</span>
           </button>
           <button className="p-2 hover:bg-white/5 rounded-lg text-text-muted hover:text-white transition-colors">
             <MoreHorizontal size={18} />
@@ -107,9 +108,9 @@ export default function Editor({ note }: EditorProps) {
       </div>
 
       {/* Editor Content Area */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <h1 
-          className="text-5xl font-bold tracking-tight outline-none focus:placeholder:opacity-10 caret-brand-primary" 
+          className="text-3xl sm:text-5xl font-bold tracking-tight outline-none focus:placeholder:opacity-10 caret-brand-primary break-words" 
           contentEditable 
           suppressContentWarning
           onBlur={handleTitleChange}
@@ -117,22 +118,22 @@ export default function Editor({ note }: EditorProps) {
           {note.title}
         </h1>
 
-        <div className="flex items-center gap-2 py-1 px-4 w-fit rounded-full bg-white/5 border border-white/10 text-xs text-text-muted">
+        <div className="flex items-center gap-2 py-1 px-3 sm:px-4 w-fit rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs text-text-muted">
           <div className="w-2 h-2 rounded-full bg-emerald-500" />
           {note.folder}
         </div>
 
-        <div className="min-h-[500px] text-lg leading-relaxed">
+        <div className="min-h-[400px] sm:min-h-[500px] text-base sm:text-lg leading-relaxed">
           <EditorContent editor={editor} />
         </div>
       </div>
 
       {/* Floating Toolbar (Linear style) */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 glass px-4 py-2 rounded-2xl flex items-center gap-2 shadow-2xl border border-white/10 z-[100]">
+      <div className="fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 glass px-2 sm:px-4 py-2 rounded-xl sm:rounded-2xl flex items-center gap-1 sm:gap-2 shadow-2xl border border-white/10 z-[100] max-w-[95vw] overflow-x-auto no-scrollbar">
         <ToolbarButton icon={Type} label="Text" onClick={() => editor?.chain().focus().setParagraph().run()} />
         <ToolbarButton icon={CheckSquare} label="Task" onClick={() => editor?.chain().focus().toggleTaskList().run()} />
         <ToolbarButton icon={Code} label="Code" onClick={() => editor?.chain().focus().toggleCodeBlock().run()} />
-        <div className="w-px h-4 bg-white/10 mx-1" />
+        <div className="w-px h-4 bg-white/10 mx-1 flex-shrink-0" />
         <ToolbarButton icon={History} label="History" />
         <ToolbarButton 
           icon={Trash2} 
@@ -150,15 +151,15 @@ export default function Editor({ note }: EditorProps) {
   )
 }
 
-
 function ToolbarButton({ icon: Icon, label, onClick, danger }: { icon: any, label: string, onClick?: () => void, danger?: boolean }) {
   return (
     <button 
       onClick={onClick}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-sm font-medium ${danger ? 'text-red-400 hover:bg-red-400/10' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}
+      className={`flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg transition-all text-sm font-medium flex-shrink-0 ${danger ? 'text-red-400 hover:bg-red-400/10' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}
+      title={label}
     >
-      <Icon size={16} />
-      <span>{label}</span>
+      <Icon size={18} />
+      <span className="hidden md:inline">{label}</span>
     </button>
   )
 }
