@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { useNoteStore, Note } from "@/lib/store"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
@@ -27,17 +28,21 @@ import {
 import Link from "next/link"
 
 interface EditorProps {
-  note: Note
+  note?: Note
+  initialTitle?: string
+  initialContent?: string
 }
 
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 
-export default function Editor({ note }: EditorProps) {
+export default function Editor({ note, initialTitle, initialContent }: EditorProps) {
   const updateNote = useNoteStore((state) => state.updateNote)
   const toggleFavorite = useNoteStore((state) => state.toggleFavorite)
   const deleteNote = useNoteStore((state) => state.deleteNote)
 
   const handleToggleFavorite = () => {
+    if (!note) return
     toggleFavorite(note.id)
     if (!note.isFavorite) {
       toast.success("Added to favorites")
@@ -47,6 +52,7 @@ export default function Editor({ note }: EditorProps) {
   }
 
   const handleDelete = () => {
+    if (!note) return
     if (confirm("Are you sure you want to delete this note?")) {
       deleteNote(note.id)
       toast.error("Note deleted successfully")
@@ -68,32 +74,40 @@ export default function Editor({ note }: EditorProps) {
         lowlight: lowlightInstance,
       }),
     ],
-    content: note.content,
+    immediatelyRender: false,
+    content: note?.content || initialContent || "",
     editorProps: {
       attributes: {
         class: "prose prose-invert max-w-none focus:outline-none min-h-[500px]",
       },
     },
     onUpdate: ({ editor }) => {
-      // Auto-save content
-      updateNote(note.id, { content: editor.getHTML() })
+      // Auto-save content if note exists
+      if (note) {
+        updateNote(note.id, { content: editor.getHTML() })
+      }
     },
   })
 
-  const [title, setTitle] = React.useState(note.title)
+  const [title, setTitle] = React.useState(note?.title || initialTitle || "Untitled Note")
   const [isSaving, setIsSaving] = React.useState(false)
 
   // Sync title with store
-  const handleTitleChange = (e: React.ChangeEvent<HTMLHeadingElement>) => {
+  const handleTitleChange = (e: React.FocusEvent<HTMLHeadingElement>) => {
     const newTitle = e.currentTarget.textContent || "Untitled"
     setTitle(newTitle)
-    setIsSaving(true)
-    updateNote(note.id, { title: newTitle })
-    setTimeout(() => {
-      setIsSaving(false)
-      toast.success("Changes saved", { duration: 1500, position: "bottom-center" })
-    }, 800)
+    
+    if (note) {
+      setIsSaving(true)
+      updateNote(note.id, { title: newTitle })
+      setTimeout(() => {
+        setIsSaving(false)
+        toast.success("Changes saved", { duration: 1500, position: "bottom-center" })
+      }, 800)
+    }
   }
+
+  if (!editor) return null
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32">
@@ -113,13 +127,15 @@ export default function Editor({ note }: EditorProps) {
           )}
           <button 
             onClick={handleToggleFavorite}
+            disabled={!note}
             className={cn(
               "p-2 rounded-lg transition-colors",
-              note.isFavorite ? "text-amber-400 bg-amber-400/10" : "text-text-muted hover:bg-white/5 hover:text-white"
+              note?.isFavorite ? "text-amber-400 bg-amber-400/10" : "text-text-muted hover:bg-white/5 hover:text-white",
+              !note && "opacity-50 cursor-not-allowed"
             )}
             title="Favorite"
           >
-            <Star size={18} fill={note.isFavorite ? "currentColor" : "none"} />
+            <Star size={18} fill={note?.isFavorite ? "currentColor" : "none"} />
           </button>
           <button className="px-2 sm:px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-xs sm:text-sm text-white transition-colors border border-white/5 flex items-center gap-2">
             <Share2 size={16} />
@@ -139,12 +155,12 @@ export default function Editor({ note }: EditorProps) {
           suppressContentWarning
           onBlur={handleTitleChange}
         >
-          {note.title}
+          {title}
         </h1>
 
         <div className="flex items-center gap-2 py-1 px-3 sm:px-4 w-fit rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs text-text-muted">
           <div className="w-2 h-2 rounded-full bg-emerald-500" />
-          {note.folder}
+          {note?.folder || "Draft"}
         </div>
 
         <div className="min-h-[400px] sm:min-h-[500px] text-base sm:text-lg leading-relaxed">
@@ -164,6 +180,7 @@ export default function Editor({ note }: EditorProps) {
           label="Delete" 
           danger 
           onClick={handleDelete} 
+          disabled={!note}
         />
       </div>
     </div>
