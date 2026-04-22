@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { auth, googleProvider, githubProvider, facebookProvider } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { Button, Input, Divider, Tabs, Tab } from "@heroui/react";
+import { Button, Input, Separator, Tabs, Tab } from "@heroui/react";
 import { Mail, Lock, Github, Globe, Search, ArrowRight, Phone, Fingerprint, Ghost } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -264,9 +264,9 @@ export default function LoginPage() {
           )}
 
           <div className="my-8 flex items-center gap-4">
-            <Divider className="flex-1 bg-white/10" />
+            <Separator className="flex-1 bg-white/10" />
             <span className="text-xs text-text-muted uppercase tracking-widest font-medium">Or continue with</span>
-            <Divider className="flex-1 bg-white/10" />
+            <Separator className="flex-1 bg-white/10" />
           </div>
 
           <div className="grid grid-cols-3 gap-3 mb-4">
